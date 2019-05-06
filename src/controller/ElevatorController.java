@@ -1,23 +1,25 @@
 package controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
 import enumeration.Direction;
 import model.Elevator;
-import model.Person;
 
 public class ElevatorController {
 
 	private Elevator elevator;
-	private Integer totalFloors = 10;
+	private Integer totalFloors;
 	List<Integer> upRequests = new ArrayList<Integer>();
 	List<Integer> downRequests = new ArrayList<Integer>();
+	List<Integer> repeatedRequests = new ArrayList<Integer>();
 
-	public ElevatorController(Elevator elevator) {
+	public ElevatorController(Elevator elevator, Integer totalFloors) {
 		super();
 		this.elevator = elevator;
+		this.totalFloors = totalFloors;
 	}
 
 	public Elevator getElevator() {
@@ -52,29 +54,39 @@ public class ElevatorController {
 		this.downRequests = downRequests;
 	}
 
+	public List<Integer> getRepeatedRequests() {
+		return repeatedRequests;
+	}
+
+	public void setRepeatedRequests(List<Integer> repeatedRequests) {
+		this.repeatedRequests = repeatedRequests;
+	}
+
+	/**
+	 * Make the elevator move
+	 */
 	public void move() {
-		System.out.println(getDownRequests());
-		System.out.println(getUpRequests());
 		Direction nearestEnd = nearestEnd();
 		moveToNearestEnd(nearestEnd);
-		moveToOppsiteDirection(nearestEnd);
+		moveToOppsiteEnd(nearestEnd);
+		if (!getRepeatedRequests().isEmpty())
+			handleRepeatedRequests();
 	}
 
 	/**
 	 * Indicates the nearest direction to go
 	 * 
-	 * @return
+	 * @return A Direction indication where to go
 	 */
 	private Direction nearestEnd() {
 		Integer currentPosition = elevator.getCurrentPosition();
-		Integer downDirection = currentPosition - 0;
 		Integer upDirection = totalFloors - currentPosition;
-		int compare = Integer.compare(downDirection, upDirection);
+		int compare = Integer.compare(currentPosition, upDirection);
 		if (compare <= 0) {
-			System.out.println("The elevator is going down...");
+			getElevator().printInformation("The elevator is going down...");
 			return Direction.DOWN;
 		} else {
-			System.out.println("The elevator is going up...");
+			getElevator().printInformation("The elevator is going up...");
 			return Direction.UP;
 		}
 	}
@@ -83,82 +95,127 @@ public class ElevatorController {
 	 * Move the elevator towards the informed direction, removing the attended
 	 * floors from the request list
 	 * 
-	 * @param nearestEnd The direction that the elevator is moving
+	 * @param nearestEnd
+	 *            The direction that the elevator is moving
 	 */
 	private void moveToNearestEnd(Direction nearestEnd) {
-		String msgMoving = String.format("Now moving %s", nearestEnd.toString());
-		System.out.println(msgMoving);
-		List<Integer> temp = Direction.UP.equals(nearestEnd) ? getUpRequests() : getDownRequests();
 		if (Direction.UP.equals(nearestEnd)) {
-			moveUp(temp);
+			moveForward(getUpRequests());
 		} else {
-			moveDown(temp);
+			moveBackward(getDownRequests());
+		}
+		clearRequest(nearestEnd);
+	}
+
+	/**
+	 * Move the elevator towards the opposite direction, attending the most
+	 * outer requests
+	 * 
+	 * @param nearestEnd
+	 * @throws Exception
+	 */
+	private void moveToOppsiteEnd(Direction nearestEnd) {
+
+		if (Direction.UP.equals(nearestEnd)) {
+			getElevator().printInformation("The elevator is going down...");
+			moveBackward(getDownRequests());
+			clearRequest(Direction.DOWN);
+		} else if (Direction.DOWN.equals(nearestEnd)) {
+			getElevator().printInformation("The elevator is going up...");
+			moveBackward(getUpRequests());
+			clearRequest(Direction.UP);
 		}
 	}
 
-	private void moveDown(List<Integer> list) {
+	/**
+	 * Move the elevator backward
+	 * 
+	 * @param list
+	 */
+	private void moveBackward(List<Integer> list) {
 		ListIterator<Integer> iterator = list.listIterator(list.size());
 		while (iterator.hasPrevious()) {
 			Integer nextFloor = iterator.previous();
 			getElevator().setCurrentPosition(nextFloor);
 			String msgReaching = String.format("Reaching %s floor", nextFloor);
-			System.out.println(msgReaching);
+			getElevator().printInformation(msgReaching);
 			iterator.remove();
 		}
-		getDownRequests().clear();
 	}
 
-	private void moveUp(List<Integer> list) {
+	/**
+	 * Move the elevator forward
+	 * 
+	 * @param list
+	 *            The request list to be
+	 */
+	private void moveForward(List<Integer> list) {
 		ListIterator<Integer> iterator = list.listIterator();
 		while (iterator.hasNext()) {
 			Integer nextFloor = iterator.next();
 			getElevator().setCurrentPosition(nextFloor);
 			String msgReaching = String.format("Reaching %s floor", nextFloor);
-			System.out.println(msgReaching);
+			getElevator().printInformation(msgReaching);
 			iterator.remove();
 		}
-		getUpRequests().clear();
 	}
 
 	/**
-	 * Move the elevator towards the opposite direction, attending the most outer
-	 * requests
+	 * Method that distributes requests from a Person into the requests lists
 	 * 
-	 * @param nearestEnd
+	 * @param person
+	 *            A Person with their requests
 	 */
-	private void moveToOppsiteDirection(Direction nearestEnd) {
-		List<Integer> temp = Direction.UP.equals(nearestEnd) ? getDownRequests() : getUpRequests();
-		ListIterator<Integer> iterator = temp.listIterator(temp.size());
-		while (iterator.hasPrevious()) {
-			Integer nextFloor = iterator.previous();
-			String msgReaching = String.format("Reaching %s floor", nextFloor);
-			System.out.println(msgReaching);
-			getElevator().setCurrentPosition(nextFloor);
-		}
-		
-		if (Direction.UP.equals(nearestEnd)) {
-			getDownRequests().clear();
+	public void handleRequests(Integer originFloor, Integer destinationFloor) {
+		if (getUpRequests().contains(originFloor) || getDownRequests().contains(originFloor)) {
+			getRepeatedRequests().add(originFloor);
 		} else {
+			distributeRequests(originFloor);
+		}
+
+		if (getUpRequests().contains(destinationFloor) || getDownRequests().contains(destinationFloor)) {
+			getRepeatedRequests().add(originFloor);
+		} else {
+			distributeRequests(destinationFloor);
+		}
+
+		Collections.sort(getDownRequests());
+		Collections.sort(getUpRequests());
+	}
+
+	public void handleRepeatedRequests() {
+		for (Integer floor : getRepeatedRequests()) {
+			distributeRequests(floor);
+		}
+		getRepeatedRequests().clear();
+		this.move();
+	}
+
+	/**
+	 * 
+	 * @param floor
+	 * @param currentFloor
+	 */
+	private void distributeRequests(Integer floor) {
+		Integer currentFloor = this.getElevator().getCurrentPosition();
+		if (floor.compareTo(currentFloor) < 0) {
+			getDownRequests().add(floor);
+		} else if (floor.compareTo(currentFloor) > 0) {
+			getUpRequests().add(floor);
+		}
+	}
+
+	/**
+	 * Clear the request list
+	 * 
+	 * @param direction
+	 *            The Direction to be cleared
+	 */
+	public void clearRequest(Direction direction) {
+		if (Direction.UP.equals(direction)) {
 			getUpRequests().clear();
+		} else {
+			getDownRequests().clear();
 		}
 	}
-
-	public void handleRequests(Person person) {
-		Integer currentPosition = this.getElevator().getCurrentPosition();
-		Integer initialFloor = person.getInitialFloor();
-		
-		if (initialFloor.compareTo(currentPosition) < 0) {
-			getDownRequests().add(initialFloor);
-		} else if (initialFloor.compareTo(currentPosition) > 0) {
-			getUpRequests().add(initialFloor);
-		}
-		
-		Integer destinationFloor = person.getDestinationFloor();
-		if (destinationFloor.compareTo(currentPosition) < 0) {
-			getDownRequests().add(destinationFloor);
-		} else if (destinationFloor.compareTo(currentPosition) > 0) {
-			getUpRequests().add(destinationFloor);
-		}
-	}
-
 }

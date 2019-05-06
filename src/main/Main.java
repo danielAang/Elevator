@@ -17,13 +17,13 @@ public class Main {
 //		controller.move();
 		
 		Elevator elevator = new Elevator(3);
-		ElevatorController controller = new ElevatorController(elevator);
-		Person person3 = new Person(8, 0);
-		Person person4 = new Person(0, 7);
-		Person person5 = new Person(3, 15);
-		controller.handleRequests(person3);
-		controller.handleRequests(person4);
-		controller.handleRequests(person5);
+		ElevatorController controller = new ElevatorController(elevator, 10);
+		Person person1 = new Person(8, 0);
+		Person person2 = new Person(0, 7);
+		Person person3 = new Person(3, 15);
+		controller.handleRequests(person1.getInitialFloor(), person1.getDestinationFloor());
+		controller.handleRequests(person2.getInitialFloor(), person2.getDestinationFloor());
+		controller.handleRequests(person3.getInitialFloor(), person3.getDestinationFloor());
 		controller.move();
 	}
 

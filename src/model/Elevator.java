@@ -26,5 +26,9 @@ public class Elevator {
 			return;
 		passengers.add(person);
 	}
+	
+	public void printInformation(String information) {
+		System.out.println(information);
+	}
 
 }
