@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import controller.ElevatorController;
+import controller.ElevatorControllerCLook;
 import enumeration.Direction;
 import junit.framework.TestCase;
 import model.Elevator;
@@ -13,13 +13,13 @@ import model.Person;
 public class ElevatorControllerTest extends TestCase {
 
 	Elevator elevator;
-	ElevatorController controller;
+	ElevatorControllerCLook controller;
 	Person person1, person2, person3;
 
 	@Before
 	public void setUp() throws Exception {
 		this.elevator = new Elevator(3);
-		this.controller = new ElevatorController(this.elevator, 10);
+		this.controller = new ElevatorControllerCLook(this.elevator, 10);
 		this.person1 = new Person(8, 0);
 		this.person2 = new Person(0, 7);
 		this.person3 = new Person(3, 15);
@@ -65,18 +65,6 @@ public class ElevatorControllerTest extends TestCase {
 		boolean empty = this.controller.getDownRequests().isEmpty();
 		System.out.println(this.controller.getDownRequests());
 		assertTrue(empty);
-	}
-	
-	@Test
-	public void testGetTotalFloors() {
-		Assert.assertNotNull(this.controller.getTotalFloors());
-	}
-	
-	@Test
-	public void testSetTotalFloors() {
-		Integer totalFloors = 100;
-		this.controller.setTotalFloors(totalFloors);
-		Assert.assertTrue(totalFloors.equals(this.controller.getTotalFloors()));
 	}
 	
 }

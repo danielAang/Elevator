@@ -8,7 +8,7 @@ import java.util.ListIterator;
 import enumeration.Direction;
 import model.Elevator;
 
-public class ElevatorController {
+public class ElevatorControllerScan {
 
 	private Elevator elevator;
 	private Integer totalFloors;
@@ -16,7 +16,7 @@ public class ElevatorController {
 	List<Integer> downRequests = new ArrayList<Integer>();
 	List<Integer> repeatedRequests = new ArrayList<Integer>();
 
-	public ElevatorController(Elevator elevator, Integer totalFloors) {
+	public ElevatorControllerScan(Elevator elevator, Integer totalFloors) {
 		super();
 		this.elevator = elevator;
 		this.totalFloors = totalFloors;
@@ -62,10 +62,8 @@ public class ElevatorController {
 		this.repeatedRequests = repeatedRequests;
 	}
 
-	/**
-	 * Make the elevator move
-	 */
 	public void move() {
+		getElevator().printInformation("Moving the elevator...");
 		Direction nearestEnd = nearestEnd();
 		moveToNearestEnd(nearestEnd);
 		moveToOppsiteEnd(nearestEnd);
@@ -83,10 +81,8 @@ public class ElevatorController {
 		Integer upDirection = totalFloors - currentPosition;
 		int compare = Integer.compare(currentPosition, upDirection);
 		if (compare <= 0) {
-			getElevator().printInformation("The elevator is going down...");
 			return Direction.DOWN;
 		} else {
-			getElevator().printInformation("The elevator is going up...");
 			return Direction.UP;
 		}
 	}
@@ -95,8 +91,7 @@ public class ElevatorController {
 	 * Move the elevator towards the informed direction, removing the attended
 	 * floors from the request list
 	 * 
-	 * @param nearestEnd
-	 *            The direction that the elevator is moving
+	 * @param nearestEnd The direction that the elevator is moving
 	 */
 	private void moveToNearestEnd(Direction nearestEnd) {
 		if (Direction.UP.equals(nearestEnd)) {
@@ -108,21 +103,18 @@ public class ElevatorController {
 	}
 
 	/**
-	 * Move the elevator towards the opposite direction, attending the most
-	 * outer requests
+	 * Move the elevator towards the opposite direction, attending the most outer
+	 * requests
 	 * 
 	 * @param nearestEnd
 	 * @throws Exception
 	 */
 	private void moveToOppsiteEnd(Direction nearestEnd) {
-
 		if (Direction.UP.equals(nearestEnd)) {
-			getElevator().printInformation("The elevator is going down...");
 			moveBackward(getDownRequests());
 			clearRequest(Direction.DOWN);
 		} else if (Direction.DOWN.equals(nearestEnd)) {
-			getElevator().printInformation("The elevator is going up...");
-			moveBackward(getUpRequests());
+			moveForward(getUpRequests());
 			clearRequest(Direction.UP);
 		}
 	}
@@ -146,8 +138,7 @@ public class ElevatorController {
 	/**
 	 * Move the elevator forward
 	 * 
-	 * @param list
-	 *            The request list to be
+	 * @param list The request list to be
 	 */
 	private void moveForward(List<Integer> list) {
 		ListIterator<Integer> iterator = list.listIterator();
@@ -163,8 +154,7 @@ public class ElevatorController {
 	/**
 	 * Method that distributes requests from a Person into the requests lists
 	 * 
-	 * @param person
-	 *            A Person with their requests
+	 * @param person A Person with their requests
 	 */
 	public void handleRequests(Integer originFloor, Integer destinationFloor) {
 		if (getUpRequests().contains(originFloor) || getDownRequests().contains(originFloor)) {
@@ -208,8 +198,7 @@ public class ElevatorController {
 	/**
 	 * Clear the request list
 	 * 
-	 * @param direction
-	 *            The Direction to be cleared
+	 * @param direction The Direction to be cleared
 	 */
 	public void clearRequest(Direction direction) {
 		if (Direction.UP.equals(direction)) {
