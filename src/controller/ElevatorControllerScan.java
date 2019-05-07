@@ -76,7 +76,7 @@ public class ElevatorControllerScan {
 	 * 
 	 * @return A Direction indication where to go
 	 */
-	private Direction nearestEnd() {
+	public Direction nearestEnd() {
 		Integer currentPosition = elevator.getCurrentPosition();
 		Integer upDirection = totalFloors - currentPosition;
 		int compare = Integer.compare(currentPosition, upDirection);
@@ -93,7 +93,7 @@ public class ElevatorControllerScan {
 	 * 
 	 * @param nearestEnd The direction that the elevator is moving
 	 */
-	private void moveToNearestEnd(Direction nearestEnd) {
+	public void moveToNearestEnd(Direction nearestEnd) {
 		if (Direction.UP.equals(nearestEnd)) {
 			moveForward(getUpRequests());
 		} else {
@@ -109,7 +109,7 @@ public class ElevatorControllerScan {
 	 * @param nearestEnd
 	 * @throws Exception
 	 */
-	private void moveToOppsiteEnd(Direction nearestEnd) {
+	public void moveToOppsiteEnd(Direction nearestEnd) {
 		if (Direction.UP.equals(nearestEnd)) {
 			moveBackward(getDownRequests());
 			clearRequest(Direction.DOWN);
@@ -124,7 +124,7 @@ public class ElevatorControllerScan {
 	 * 
 	 * @param list
 	 */
-	private void moveBackward(List<Integer> list) {
+	public void moveBackward(List<Integer> list) {
 		ListIterator<Integer> iterator = list.listIterator(list.size());
 		while (iterator.hasPrevious()) {
 			Integer nextFloor = iterator.previous();
@@ -140,7 +140,7 @@ public class ElevatorControllerScan {
 	 * 
 	 * @param list The request list to be
 	 */
-	private void moveForward(List<Integer> list) {
+	public void moveForward(List<Integer> list) {
 		ListIterator<Integer> iterator = list.listIterator();
 		while (iterator.hasNext()) {
 			Integer nextFloor = iterator.next();
